@@ -18,5 +18,5 @@ app.get("/stock", async (req, res) => {
 
   res.json({ stock });
 });
-
-app.listen(3000, () => console.log("Running"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Running on port " + PORT));
