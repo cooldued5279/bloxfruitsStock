@@ -1,32 +1,25 @@
+const express = require("express");
+const axios = require("axios");
+
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("API is running");
+});
+
 app.get("/stock", async (req, res) => {
   try {
-    const url = "https://blox-fruits-stock.vercel.app/";
+    const { data } = await axios.get("https://fruityblox.com/api/stock");
 
-    const { data } = await axios.get(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0"
-      }
-    });
-
-    const $ = cheerio.load(data);
-
-    let stock = [];
-
-    $("body").find("*").each((i, el) => {
-      const text = $(el).text().trim();
-
-      if (
-        text.includes("Fruit") ||
-        text.includes("Rocket") ||
-        text.includes("Dragon")
-      ) {
-        stock.push(text);
-      }
-    });
-
-    res.json({ stock });
+    res.json(data);
 
   } catch (err) {
-    res.status(500).json({ error: "Scraper blocked or site changed" });
+    res.status(500).json({
+      error: "Failed to fetch stock",
+      details: err.message
+    });
   }
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Running on port " + PORT));
