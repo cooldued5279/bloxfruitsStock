@@ -1,28 +1,32 @@
-const express = require("express");
-const axios = require("axios");
-const cheerio = require("cheerio");
-
-const app = express();
-
 app.get("/stock", async (req, res) => {
   try {
     const url = "https://blox-fruits-stock.vercel.app/";
 
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
     const $ = cheerio.load(data);
 
     let stock = [];
 
-    $(".stock-item").each((i, el) => {
-      stock.push($(el).text().trim());
+    $("body").find("*").each((i, el) => {
+      const text = $(el).text().trim();
+
+      if (
+        text.includes("Fruit") ||
+        text.includes("Rocket") ||
+        text.includes("Dragon")
+      ) {
+        stock.push(text);
+      }
     });
 
     res.json({ stock });
 
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch stock" });
+    res.status(500).json({ error: "Scraper blocked or site changed" });
   }
 });
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Running on port " + PORT));
